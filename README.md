@@ -1,4 +1,4 @@
-# String Manipulation
+# String Constructors
 
 ## Learning Goals
 
@@ -25,7 +25,7 @@ String cat = "Tom";
 
 This code uses a **string literal** "Tom" to assign a value to a `String` data type.
 
-But what happens when we assigned multiple variables to the same string literal,
+But what happens when we assign multiple variables to the same string literal,
 for example:
 
 ```java
@@ -49,7 +49,7 @@ address and not create another object.
 ![String Pool with Literals](https://curriculum-content.s3.amazonaws.com/6676/java-mod2-strings/string_heap_1.png)
 
 The JVM uses the String pool to avoid creating unnecessary objects
-since each `String` is immutable and it is usually ok to have multiple variables
+since each `String` is immutable, and it is usually ok to have multiple variables
 referencing the same `String` object.
 
 NOTE: IntelliJ's Java Visualizer displays strings as literal values stored in the variable,
@@ -76,7 +76,7 @@ Java's `String` class actually comes with several constructors, so we can use th
 operator followed by a constructor call such as `String()`
 to help instantiate different `String` objects with the same character sequence!
 
-Recall that a constructor is a special
+A constructor is a special
 method used to initialize the fields of an object. A class can have several
 constructors as long as the number or type of the parameters differ.
 While the `String` class has over a dozen constructors, we will look at four:
@@ -121,7 +121,7 @@ To better explain some of these constructors, let's look at each one:
 2. `String cat2 = new String(name);` - The second constructor takes in a `String` as a parameter. This will
    assign the variable `cat2` to a new `String` object that contains the same sequence of characters as the
    `String` object referenced by `name`, i.e. "Tom-Cat".
-   - Notice that `name` and `cat` reference different objects in memory,
+   - Notice that `name` and `cat2` reference different objects in memory,
      even though the character sequence they store "Tom-Cat" is the same.
    - The JVM *always* creates a new object when the `new` operator is used.
 3. `String cat3 = new String(charArray);` - The third constructor takes in a character array
@@ -145,10 +145,107 @@ To better explain some of these constructors, let's look at each one:
 You can step through the program to see each constructor in action at
 [this link](https://pythontutor.com/visualize.html#code=public%20class%20StringCatExample%20%7B%0A%20%20%20%20public%20static%20void%20main%28String%5B%5D%20args%29%20%7B%0A%20%20%20%20%20%20%20%20char%5B%5D%20charArray%20%3D%20%7B'T',%20'o',%20'm',%20'-',%20'C',%20'a',%20't'%7D%3B%0A%20%20%20%20%20%20%20%20String%20name%20%3D%20%22Tom-Cat%22%3B%0A%20%20%20%20%20%20%20%20String%20cat1%20%3D%20new%20String%28%29%3B%0A%20%20%20%20%20%20%20%20String%20cat2%20%3D%20new%20String%28name%29%3B%0A%20%20%20%20%20%20%20%20String%20cat3%20%3D%20new%20String%28charArray%29%3B%0A%20%20%20%20%20%20%20%20String%20cat4%20%3D%20new%20String%28charArray,%200,%203%29%3B%0A%20%20%20%20%7D%0A%7D&cumulative=false&curInstr=0&heapPrimitives=true&mode=display&origin=opt-frontend.js&py=java&rawInputLstJSON=%5B%5D&textReferences=false).
 
+## Testing strings for equality
+
+
+
+All string objects are stored in the heap. However, only those created using a string literal live in the
+area of the heap called the string pool.
+
+Let's summarize the rules on string instantiation:
+
+1. When a variable is assigned to a string literal, the JVM will check the *string pool*.
+   - If the string pool contains another `String` with that character sequence, the JVM will return a reference to that object.
+   - If the string pool _does not_ contain another `String` in the string pool with that character sequence, then a new `String` is created and stored in the string pool.
+2. When a variable is assigned using a `String` constructor call, a new `String` object is created that lives in the heap, but not in the string pool.
+
+
+
+```java
+String cat1 = "Tom";   //create a new string in the string pool
+String cat2 = "Tom";   //point to existing string in the string pool
+String cat3 = new String("Tom");  //create a new string that is not in the string pool
+```
+
+We can see `cat1` and `cat2` reference the same  object since they are assigned the same
+string literal "Tom", while `cat3` references a new object since it is assigned using a 
+`String` constructor call.
+
+
+![string equality](https://curriculum-content.s3.amazonaws.com/6676/java-mod2-strings/string_equality.png)
+
+
+What happens if we test two string variables for equality using the `==` operator?
+The expression `x == y` is true when variables `x` and `y` store the same value.
+Since `String` is a reference type, the expression `x == y` is true when `x` and
+`y` store the same memory address, which means they reference the same object.
+
+Looking at the image above for the three object references, we can see
+`cat1 == cat2` is `true` since they point to the same object, while
+`cat1 == cat3` is false.   Consider the output of this code:
+
+
+```java
+String cat1 = "Tom";
+String cat2 = "Tom";
+String cat3 = new String("Tom");
+
+System.out.printf( "%s == %s is %b%n" , cat1, cat2, cat1 == cat2 );  
+System.out.printf( "%s == %s is %b%n" , cat1, cat3, cat1 == cat3 );  
+```
+
+The code prints:
+
+```text
+Tom == Tom is true
+Tom == Tom is false
+```
+
+Some strings that store the character sequence "Tom"
+are equal to each other, while others are not!  This can lead to many problems, since
+we often need to write programs that compare strings for equality.
+
+Usually when we compare strings we want to test
+if two strings contain the same character sequence,
+not whether they reference the same object. The `String` class
+has a special method named `equals` that lets us do exactly that:
+
+
+| String Method                          | Description                                                                                                                                                                                                 |
+|----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| public boolean equals(Object anObject) | Compares this string to the specified object.<br> The result is true if and only if the argument is not<br> null and is a String object that represents the same<br> sequence of characters as this object. |
+
+
+The expressions `cat1.equals(cat2)` and `cat1.equals(cat3)` are both true since the strings all
+contain the same character sequence:
+
+```java
+public class StringEquality {
+
+   public static void main(String[] args) {
+      String cat1 = "Tom";
+      String cat2 = "Tom";
+      String cat3 = new String("Tom");
+
+      System.out.printf( "%s == %s is %b%n" , cat1, cat2, cat1 == cat2 );  //true
+      System.out.printf( "%s == %s is %b%n" , cat1, cat3, cat1 == cat3 );  //false
+      System.out.printf( "%s.equals(%s) is %b%n" , cat1, cat2, cat1.equals(cat2) ); //true
+      System.out.printf( "%s.equals(%s) is %b%n" ,  cat1, cat3, cat1.equals(cat3) ); //true
+
+   }
+
+}
+```
+
+
+As a general rule, use `equals()` to compare strings or any other reference type, not `==`.
+We will explore the `equals()` method in more detail in a later lesson.
+
 
 
 ## Resources
 
 - [Java 17 String](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html)   
-- [Java 17 String constructors](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html#constructor-summary)
+- [Java 17 String constructors](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html#constructor-summary)     
+- [Java 17 String equals](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/String.html#equals(java.lang.Object))
 
