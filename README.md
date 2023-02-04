@@ -78,7 +78,7 @@ to help instantiate different `String` objects with the same character sequence!
 
 A constructor is a special
 method used to initialize the fields of an object. A class can have several
-constructors as long as the number or type of the parameters differ.
+constructors as long as the number or type of parameters differ.
 While the `String` class has over a dozen constructors, we will look at four:
 
 
